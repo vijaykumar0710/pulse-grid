@@ -1,7 +1,7 @@
 const express = require("express");
 require("dotenv").config();
 const connectDB = require("./config/db");
-const { connectRedis } = require("./config/redis");
+const { connectRedis, redisClient } = require("./config/redis");
 
 const app = express();
 app.use(express.json());
@@ -12,15 +12,22 @@ connectRedis();
 
 const PORT = process.env.PORT || 5000;
 
-app.post("/api/vitals", (req, res) => {
+app.post("/api/vitals", async(req, res) => {
   const { bedId, heartRate, spO2, timestamp } = req.body;
-  console.log(
-    `[Server] Received Data -> ${bedId} | HR: ${heartRate} | SpO2: ${spO2}`,
-  );
+  try{
+  await redisClient.publish("ive_vitals", JSON.stringify(req.body));
+  await redisClient.ts.add(`ts:${bedId}:hr`, timestamp, heartRate);
+  await redisClient.ts.add(`ts:${bedId}:spo2`, timestamp, spO2);
   res.status(200).json({
     success: true,
-    message: "data ingested successfully",
+    message: "data fanned out successfully",
   });
+  } catch (error) {
+    console.error("Fan-out Error", error);
+    res.status(500).json({
+      success: false, message:"Server Issue"
+    });
+  }
 });
 
 app.listen(PORT, () => {
