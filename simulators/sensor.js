@@ -1,4 +1,4 @@
-const BED_IDS = ["bed_5", "bed_6"];
+const BED_IDS = Array.from({ length: 10 }, (_, i) => `bed_${i + 1}`);
 const SERVER_URL = "http://127.0.0.1:5000/api/vitals";
 function generateVitals(bedId) {
   return {

@@ -1,7 +1,7 @@
 const { Worker } = require("bullmq");
 const { redisClient } = require("../config/redis");
 
-console.log("🤖 AI Worker is ready and watching for critical vitals...");
+console.log("AI Worker is ready and watching for critical vitals...");
 const worker = new Worker(
   "ai-vitals-check",
   async (job) => {
@@ -19,7 +19,7 @@ const worker = new Worker(
       };
       await redisClient.publish("alerts", JSON.stringify(alertMessage));
     } else {
-      console.log(`[AI Guard 🟢] ${data.bedId} is stable (SpO2: ${data.spO2})`);
+      console.log(`[AI Guard] ${data.bedId} is stable (SpO2: ${data.spO2})`);
     }
   },
   {

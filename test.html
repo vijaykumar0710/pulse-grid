@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>PulseGrid Dynamic Monitor</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f7f6;
+      padding: 20px;
+    }
+
+    .bed-container {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    /* flex-wrap se cards next line mein aa jayenge */
+    .bed-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      width: 200px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      border: 3px solid transparent;
+    }
+
+    .critical {
+      background-color: #ffe6e6;
+      border-color: #ff4c4c;
+      animation: red-blink 0.8s infinite alternate;
+    }
+
+    @keyframes red-blink {
+      from {
+        box-shadow: 0 0 10px #ff4c4c;
+      }
+
+      to {
+        box-shadow: 0 0 30px #ff0000;
+      }
+    }
+
+    .vitals {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .alert-text {
+      color: red;
+      font-size: 12px;
+      font-weight: bold;
+      display: none;
+    }
+
+    .critical .alert-text {
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>🏥 PulseGrid Live Monitor (Dynamic Dashboard)</h1>
+  <p>Auto-detecting live beds from the server...</p>
+
+  <div id="bed-container" class="bed-container"></div>
+
+  <script>
+    const socket = io("http://127.0.0.1:5000");
+    const container = document.getElementById("bed-container");
+
+    socket.on("connect", () => {
+      console.log("🟢 Connected to PulseGrid Server!");
+    });
+
+    socket.on("vitals_update", (data) => {
+      // 1. Check karo ki kya is bed ka card pehle se screen par hai?
+      let bedCard = document.getElementById(data.bedId);
+
+      // 2. Agar card nahi hai, toh ek naya card banao (The Dynamic Magic)
+      if (!bedCard) {
+        bedCard = document.createElement("div");
+        bedCard.id = data.bedId;
+        bedCard.className = "bed-card";
+
+        // Card ka design HTML inject karo
+        bedCard.innerHTML = `
+                    <h2 style="text-transform: uppercase;">${data.bedId.replace('_', ' ')}</h2>
+                    <p>HR: <span id="${data.bedId}_hr" class="vitals">--</span> bpm</p>
+                    <p>SpO2: <span id="${data.bedId}_spo2" class="vitals">--</span> %</p>
+                    <p class="alert-text">🚨 CRITICAL LEVEL!</p>
+                `;
+        container.appendChild(bedCard);
+      }
+
+      // 3. Values update karo
+      document.getElementById(`${data.bedId}_hr`).innerText = data.heartRate;
+      document.getElementById(`${data.bedId}_spo2`).innerText = data.spO2;
+
+      // 4. Red Blink Logic
+      if (data.spO2 >= 90) {
+        bedCard.classList.remove("critical");
+      }
+    });
+
+    socket.on("red_blink_alert", (alertData) => {
+      const bedCard = document.getElementById(alertData.bedId);
+      if (bedCard) bedCard.classList.add("critical");
+    });
+  </script>
+</body>
+
+</html>
