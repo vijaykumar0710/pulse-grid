@@ -1,6 +1,7 @@
 const express = require("express");
 const http = require("http"); 
 const { Server } = require("socket.io");
+const VitalHistory = require("./models/VitalHistory");
 require("dotenv").config();
 
 const connectDB = require("./config/db");
@@ -64,6 +65,34 @@ app.post("/api/vitals", async (req, res) => {
       success: false,
       message: "Server Issue",
     });
+  }
+});
+
+app.get("/api/vitals/history/:patientId", async (req, res) => {
+  try {
+    const { patientId } = req.params;
+    const currentDate = "2026-05-24"; // Testing ke liye fixed date, real mein naya date use karenge
+
+    // MongoDB se us patient ka aaj ka data nikalen
+    const history = await VitalHistory.findOne({
+      patient_id: patientId,
+      date: currentDate,
+    });
+
+    if (!history) {
+      return res
+        .status(404)
+        .json({ success: false, message: "No history found for today" });
+    }
+
+    // React ke Recharts graph ke liye data bhej rahe hain
+    res.status(200).json({
+      success: true,
+      data: history.vitals, // Yeh wahi array [] hai jo bucket pattern mein save ho raha hai
+    });
+  } catch (error) {
+    console.error("Fetch History Error", error);
+    res.status(500).json({ success: false, message: "Server Error" });
   }
 });
 
