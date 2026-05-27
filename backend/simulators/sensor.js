@@ -1,5 +1,6 @@
 const BED_IDS = Array.from({ length: 10 }, (_, i) => `bed_${i + 1}`);
 const SERVER_URL = "http://127.0.0.1:5000/api/vitals";
+
 function generateVitals(bedId) {
   return {
     bedId: bedId,
@@ -19,14 +20,13 @@ setInterval(async () => {
         body: JSON.stringify(data),
       });
       if (response.ok) {
-        console.log(
-          `[Sensor] Sent: ${bed} -> HR: ${data.heartRate}, SpO2: ${data.spO2}`,
-        );
+        // Commenting this out to reduce terminal spam, you can uncomment if needed
+        // console.log(`[Sensor] Sent: ${bed} -> HR: ${data.heartRate}, SpO2: ${data.spO2}`);
       }
     } catch (error) {
-      console.error(`Sensor error`);
+      console.error(`Sensor connection error`);
     }
   }
 }, 2000);
 
-console.log("Dummy Sensors Started for Bed 5 & 6...");
+console.log("📡 IoT Sensors Started! Sending data every 2 seconds...");

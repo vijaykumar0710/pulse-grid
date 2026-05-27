@@ -18,9 +18,12 @@
   "homepage": "https://github.com/vijaykumar0710/pulse-grid#readme",
   "description": "",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "bullmq": "^5.77.1",
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.6.2",
     "node-cron": "^4.2.1",
     "redis": "^5.12.1",
