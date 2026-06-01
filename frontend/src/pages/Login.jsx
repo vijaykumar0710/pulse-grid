@@ -9,17 +9,20 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://127.0.0.1:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+     import { API_URL } from "../config";
+
+     const res = await fetch(`${API_URL}/api/auth/login`, {
+       method: "POST",
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify({ email, password }),
+     });
       const data = await res.json();
 
       if (data.success) {
         // Token aur Role ko browser mein save kar lo
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("role", data.user.role);
+       localStorage.setItem("token", data.token);
+       localStorage.setItem("role", data.user.role);
+       localStorage.setItem("name", data.user.name);
 
         // Role ke hisaab se redirect karo
         if (data.user.role === "Doctor") {

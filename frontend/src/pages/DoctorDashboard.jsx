@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
+import { SOCKET_URL } from "../config";
+import socket from "../socket";
 import { LogOut, Send, MessageSquare } from "lucide-react";
 
-// WebSockets connection configured for compatibility
-const socket = io("http://127.0.0.1:5000", {
-  transports: ["websocket", "polling"],
-});
 
 export default function DoctorDashboard() {
   const navigate = useNavigate();
@@ -37,8 +35,7 @@ export default function DoctorDashboard() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
+    localStorage.clear();
     navigate("/");
   };
 
@@ -46,7 +43,7 @@ export default function DoctorDashboard() {
     if (currentMessage.trim() !== "") {
       const msgData = {
         ward: wardName,
-        sender: "Dr. Sharma",
+        sender: localStorage.getItem("name"),
         role: "Doctor",
         text: currentMessage,
         time: new Date().toLocaleTimeString([], {

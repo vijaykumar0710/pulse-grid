@@ -1,20 +1,22 @@
 const { createClient } = require("redis");
-require('dotenv').config();
+require("dotenv").config();
 
 const redisClient = createClient({
-  url:`redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`
+  url: process.env.REDIS_URL,
 });
 
-// Event Listeners for logging
-redisClient.on('connect', () => console.log('[Redis] Connecting...'));
-redisClient.on('ready', () => console.log('[Redis] Connected & Ready to use (TimeSeries/Cache/PubSub)!'));
-redisClient.on('error', (err) => console.error('[Redis Error]', err));
+redisClient.on("connect", () => console.log("[Redis] Connecting..."));
+
+redisClient.on("ready", () => console.log("[Redis] Connected Successfully"));
+
+redisClient.on("error", (err) => console.error("[Redis Error]", err));
 
 const connectRedis = async () => {
   try {
     await redisClient.connect();
+    console.log("✅ Redis Connected");
   } catch (error) {
-    console.error("[Redis Failed]", error);
+    console.error("❌ Redis Connection Failed:", error.message);
   }
 };
 

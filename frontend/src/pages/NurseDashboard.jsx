@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { SOCKET_URL } from "../config";
 import { io } from "socket.io-client";
+import socket from "../socket";
 import { Heart, Activity, AlertCircle, LogOut, Send } from "lucide-react";
 import {
   LineChart,
@@ -11,10 +13,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-// WebSockets connection configured for compatibility
-const socket = io("http://127.0.0.1:5000", {
-  transports: ["websocket", "polling"],
-});
 
 export default function NurseDashboard() {
   const [beds, setBeds] = useState({});
@@ -26,8 +24,7 @@ export default function NurseDashboard() {
   const wardName = "Ward-A";
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
+    localStorage.clear();
     navigate("/");
   };
 
@@ -94,7 +91,7 @@ export default function NurseDashboard() {
     if (currentMessage.trim() !== "") {
       const msgData = {
         ward: wardName,
-        sender: "Sister Alina",
+        sender: localStorage.getItem("name"),
         role: "Nurse",
         text: currentMessage,
         time: new Date().toLocaleTimeString([], {
