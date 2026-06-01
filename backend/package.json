@@ -2,11 +2,9 @@
   "name": "pulse-grid",
   "version": "1.0.0",
   "main": "index.js",
-  
   "scripts": {
-    "start": "node server.js",
-    "worker:ai": "node workers/aiWorker.js",
-    "worker:aggregator": "node workers/aggregatorWorker.js"
+    "start": "node start.js",
+    "dev": "nodemon start.js"
   },
   "repository": {
     "type": "git",
