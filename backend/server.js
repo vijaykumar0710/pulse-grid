@@ -81,29 +81,11 @@ const setupRedisSubscriber = async () => {
     io.emit("vitals_update", JSON.parse(message));
   });
 
-  // AI Alerts to Chat & Frontend
+  // AI Alerts to  Frontend
   await subscriber.subscribe("alerts", async (message) => {
     const alertData = JSON.parse(message);
+
     io.emit("red_blink_alert", alertData);
-
-    const aiMessage = {
-      ward: "Ward-A",
-      sender: "🤖 PulseGrid AI",
-      role: "System",
-      text: `CRITICAL ALERT: ${alertData.bedId} SpO2 dropped to ${alertData.spO2}%. Immediate action required!`,
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
-
-    io.to("Ward-A").emit("receive_message", aiMessage);
-
-    try {
-      await ChatHistory.create(aiMessage);
-    } catch (error) {
-      console.log("AI Message DB save error:", error);
-    }
   });
 };
 setupRedisSubscriber();
