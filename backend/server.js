@@ -6,21 +6,22 @@ require("dotenv").config();
 
 const connectDB = require("./config/db");
 const { connectRedis, redisClient } = require("./config/redis");
-
 const aiQueue = require("./queues/aiQueue");
-
 const authRoutes = require("./routes/authRoutes");
-
 const ChatHistory = require("./models/ChatHistory");
 const VitalHistory = require("./models/VitalHistory");
 
 const app = express();
 
+const allowedOrigins = ["http://localhost:5173", process.env.CLIENT_URL].filter(
+  Boolean,
+);
+
 app.use(express.json());
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: allowedOrigins,
     credentials: true,
   }),
 );
@@ -29,22 +30,14 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL,
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true,
   },
 });
 
-// ======================
-// DB + REDIS
-// ======================
-
 connectDB();
 connectRedis();
-
-// ======================
-// SOCKET.IO
-// ======================
 
 io.on("connection", (socket) => {
   console.log(`🔌 Client Connected: ${socket.id}`);
@@ -53,15 +46,13 @@ io.on("connection", (socket) => {
     socket.join(wardName);
 
     try {
-      const history = await ChatHistory.find({
-        ward: wardName,
-      })
+      const history = await ChatHistory.find({ ward: wardName })
         .sort({ createdAt: 1 })
         .limit(50);
 
       socket.emit("chat_history", history);
     } catch (err) {
-      console.error(err);
+      console.error("Chat history error:", err.message);
     }
   });
 
@@ -77,7 +68,7 @@ io.on("connection", (socket) => {
 
       io.to(data.ward).emit("receive_message", data);
     } catch (err) {
-      console.error(err);
+      console.error("Send message error:", err.message);
     }
   });
 
@@ -85,10 +76,6 @@ io.on("connection", (socket) => {
     console.log(`❌ Client Disconnected: ${socket.id}`);
   });
 });
-
-// ======================
-// REDIS SUBSCRIBER
-// ======================
 
 const setupRedisSubscriber = async () => {
   try {
@@ -101,27 +88,31 @@ const setupRedisSubscriber = async () => {
     });
 
     await subscriber.subscribe("alerts", (message) => {
-      const alertData = JSON.parse(message);
-
-      io.emit("red_blink_alert", alertData);
+      io.emit("red_blink_alert", JSON.parse(message));
     });
 
     console.log("✅ Redis Subscriber Running");
   } catch (err) {
-    console.error("Redis Subscriber Error:", err);
+    console.error("Redis Subscriber Error:", err.message);
   }
 };
 
 setupRedisSubscriber();
 
-// ======================
-// ROUTES
-// ======================
-
 app.use("/api/auth", authRoutes);
 
 app.get("/", (req, res) => {
-  res.send("PulseGrid Backend Running 🚀");
+  res.status(200).json({
+    success: true,
+    message: "PulseGrid Backend Running 🚀",
+  });
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    status: "healthy",
+  });
 });
 
 app.post("/api/vitals", async (req, res) => {
@@ -130,10 +121,8 @@ app.post("/api/vitals", async (req, res) => {
 
     await redisClient.publish("live_vitals", JSON.stringify(req.body));
 
-    // Redis TimeSeries
     try {
       await redisClient.ts.add(`ts:${bedId}:hr`, timestamp, heartRate);
-
       await redisClient.ts.add(`ts:${bedId}:spo2`, timestamp, spO2);
     } catch (err) {
       console.log("Redis TimeSeries Not Available. Skipping...");
@@ -146,7 +135,7 @@ app.post("/api/vitals", async (req, res) => {
       message: "Vitals Received",
     });
   } catch (error) {
-    console.error(error);
+    console.error("Vitals API Error:", error.message);
 
     res.status(500).json({
       success: false,
@@ -166,16 +155,14 @@ app.get("/api/vitals/history/:patientId", async (req, res) => {
       data: history ? history.vitals : [],
     });
   } catch (error) {
+    console.error("History API Error:", error.message);
+
     res.status(500).json({
       success: false,
       message: "Server Error",
     });
   }
 });
-
-// ======================
-// START SERVER
-// ======================
 
 const PORT = process.env.PORT || 5000;
 

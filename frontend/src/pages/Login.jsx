@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../config";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -8,23 +9,21 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    try {
-     import { API_URL } from "../config";
 
-     const res = await fetch(`${API_URL}/api/auth/login`, {
-       method: "POST",
-       headers: { "Content-Type": "application/json" },
-       body: JSON.stringify({ email, password }),
-     });
+    try {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
       const data = await res.json();
 
       if (data.success) {
-        // Token aur Role ko browser mein save kar lo
-       localStorage.setItem("token", data.token);
-       localStorage.setItem("role", data.user.role);
-       localStorage.setItem("name", data.user.name);
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.user.role);
+        localStorage.setItem("name", data.user.name);
 
-        // Role ke hisaab se redirect karo
         if (data.user.role === "Doctor") {
           navigate("/doctor-dashboard");
         } else {
@@ -35,6 +34,7 @@ export default function Login() {
       }
     } catch (error) {
       console.error("Login error", error);
+      alert("Server connection failed");
     }
   };
 
@@ -51,6 +51,7 @@ export default function Login() {
         }}
       >
         <h2>🏥 PulseGrid Login</h2>
+
         <form
           onSubmit={handleLogin}
           style={{
@@ -72,6 +73,7 @@ export default function Login() {
               border: "1px solid #ccc",
             }}
           />
+
           <input
             type="password"
             placeholder="Password"
@@ -84,6 +86,7 @@ export default function Login() {
               border: "1px solid #ccc",
             }}
           />
+
           <button
             type="submit"
             style={{
