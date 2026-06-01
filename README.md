@@ -1,4 +1,4 @@
-# PulseGrid 🏥
+<img width="1213" height="514" alt="image" src="https://github.com/user-attachments/assets/4dab96e2-3163-4469-a996-b980fac731fe" /># PulseGrid 🏥
 
 Real-Time Hospital Monitoring Platform built using MERN Stack, Redis, Socket.IO and BullMQ.
 
@@ -83,6 +83,22 @@ Critical Alerts:
 Vitals → BullMQ Queue → AI Worker → Redis Pub/Sub → Frontend
 
 ---
+## High Level Architecture
+
+<img width="1213" height="514" alt="image" src="https://github.com/user-attachments/assets/0a316154-7798-4909-b85c-839f027d8914" />
+
+### Data Flow
+
+1. IoT Sensors continuously generate patient vitals.
+2. Backend receives vitals through REST APIs.
+3. Redis Pub/Sub broadcasts live vitals to connected dashboards.
+4. BullMQ queues critical events for background processing.
+5. AI Worker evaluates incoming vitals and generates alerts.
+6. Critical alerts are pushed to Doctor and Nurse dashboards using Socket.IO.
+7. MongoDB stores users, chat history and alert records.
+8. Redis acts as a real-time messaging layer and caching layer.
+Note:- Current deployment uses a single backend instance.
+Architecture is designed to horizontally scale across multiple backend nodes.
 
 ## Tech Stack
 
@@ -126,8 +142,11 @@ Vitals → BullMQ Queue → AI Worker → Redis Pub/Sub → Frontend
 ### Nurse Monitoring Dashboard
 
 ### Critical Alert Detection
+<img width="809" height="619" alt="image" src="https://github.com/user-attachments/assets/7fc63944-9807-4433-b0c7-c116e985736d" />
 
-(Add screenshots here)
+<img width="1194" height="897" alt="image" src="https://github.com/user-attachments/assets/2c486d9c-eac6-4e3c-b41e-7a84bc767183" />
+
+<img width="1917" height="970" alt="image" src="https://github.com/user-attachments/assets/f1feaf62-0d41-49ee-aeff-73d6150821e0" />
 
 ---
 
