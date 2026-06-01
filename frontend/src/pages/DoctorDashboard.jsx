@@ -43,7 +43,7 @@ export default function DoctorDashboard() {
     if (currentMessage.trim() !== "") {
       const msgData = {
         ward: wardName,
-        sender: localStorage.getItem("name"),
+        sender: localStorage.getItem("name") || "Doctor",
         role: "Doctor",
         text: currentMessage,
         time: new Date().toLocaleTimeString([], {

@@ -58,7 +58,20 @@ io.on("connection", (socket) => {
 
   socket.on("send_message", async (data) => {
     try {
-      await ChatHistory.create({
+      console.log("📩 Message received:", data);
+
+      if (
+        !data.ward ||
+        !data.sender ||
+        !data.role ||
+        !data.text ||
+        !data.time
+      ) {
+        console.log("❌ Invalid chat data:", data);
+        return;
+      }
+
+      const savedMessage = await ChatHistory.create({
         ward: data.ward,
         sender: data.sender,
         role: data.role,
@@ -66,9 +79,11 @@ io.on("connection", (socket) => {
         time: data.time,
       });
 
-      io.to(data.ward).emit("receive_message", data);
+      console.log("✅ Chat saved in MongoDB:", savedMessage._id);
+
+      io.to(data.ward).emit("receive_message", savedMessage);
     } catch (err) {
-      console.error("Send message error:", err.message);
+      console.error("❌ Chat save error:", err.message);
     }
   });
 

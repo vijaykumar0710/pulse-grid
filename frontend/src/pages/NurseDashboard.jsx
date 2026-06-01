@@ -91,7 +91,7 @@ export default function NurseDashboard() {
     if (currentMessage.trim() !== "") {
       const msgData = {
         ward: wardName,
-        sender: localStorage.getItem("name"),
+        sender: localStorage.getItem("name") || "Nurse",
         role: "Nurse",
         text: currentMessage,
         time: new Date().toLocaleTimeString([], {
