@@ -12,6 +12,7 @@
 6. Critical alerts are pushed to Doctor and Nurse dashboards using Socket.IO.
 7. MongoDB stores users, chat history and alert records.
 8. Redis acts as a real-time messaging layer and caching layer.
+   
 Note:- Current deployment uses a single backend instance.
 Architecture is designed to horizontally scale across multiple backend nodes.
 # PulseGrid 🏥
